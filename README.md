@@ -1,86 +1,106 @@
 # Palette Recolor Studio
 
-A Vite + React tool for building a workspace swatch from Affinity palette files or images, then recoloring an uploaded image against the selected workspace colors.
+Palette Recolor Studio is a local browser tool for building color swatches and using them to recolor images.
 
-## Features
+You can collect colors from Affinity palette files, images, and built-in palette collections, then mix those colors into a workspace swatch. Once the workspace swatch is ready, upload a target image and preview how it looks when recolored with those colors.
 
-- Import colors from `.afpalette` files.
-- Extract swatches from source images with configurable quantizer, color count, and distance formula.
-- Build a mixed workspace swatch from multiple sources.
-- Enable, disable, remove, and clear workspace colors.
-- Re-sort swatches by perceptual color properties, luminance, RGB channels, or image-q distance.
-- Recolor a target image with configurable palette application settings.
-- Preview original vs recolored output, zoom, pan, reset zoom, and view at natural image size.
-- Save and load local snapshots, including restorable browser image data.
-- Export/import portable JSON state with image references instead of embedded image data.
+## Start The Tool
 
-## Development
+Install the app once:
 
 ```sh
 npm install
+```
+
+Start it:
+
+```sh
 npm run dev
 ```
 
-The dev server binds to `127.0.0.1`. If port `5173` is occupied, Vite will choose the next available port.
-
-Build for production:
-
-```sh
-npm run build
-```
-
-Regenerate the public palette-source JSON files:
-
-```sh
-npm run extract:palettes
-```
-
-Preview the production build:
-
-```sh
-npm run preview
-```
-
-## Project Structure
+Open the local address shown in the terminal. It is usually:
 
 ```text
-src/
-  App.jsx
-  main.jsx
-  styles.css
-  components/
-    common/
-    image-preview/
-    image-recolor/
-    input-source-color/
-    snapshots/
-    workspace-swatch/
-  utils/
+http://127.0.0.1:5173/
 ```
 
-- `src/main.jsx`: React bootstrap only.
-- `src/App.jsx`: top-level state orchestration and major component composition.
-- `src/components/common`: shared UI controls such as swatches, collapsible panels, floating bars, selects, tooltips, and layout.
-- `src/components/input-source-color`: source color import UI plus `.afpalette` parsing and image palette extraction.
-- `src/components/workspace-swatch`: workspace swatch panel.
-- `src/components/snapshots`: snapshot list, actions, and load confirmation dialog.
-- `src/components/image-recolor`: recolor settings UI and recolor worker/utilities.
-- `src/components/image-preview`: image preview, toolbar, zoom, pan, and original/recolored toggle UI.
-- `src/utils`: storage, constants, and file/data URL helpers.
-- `public/palette-sources`: normalized palette JSON extracted from public palette collections.
-- `scripts/extractPaletteSources.mjs`: source-data extractor for the public palette JSON files.
+If that port is already busy, Vite will choose the next available one, such as `http://127.0.0.1:5174/`.
+
+## Basic Flow
+
+1. Open **Import Source Colors**.
+2. Choose a source:
+   - **AFPalette**: drop or choose an `.afpalette` file.
+   - **Image**: drop or choose an image and extract colors from it.
+   - **Built-in Palettes**: search built-in palette collections and load palettes into the source list.
+3. Add individual colors or use the add-all action to move source colors into **Workspace Swatch**.
+4. In **Workspace Swatch**, click colors to enable or disable them without removing them.
+5. Open **Recolor Image** and load the image you want to recolor.
+6. Adjust the recolor settings and preview the result.
+7. Save the recolored image from the image toolbar.
+
+## Working With Swatches
+
+The workspace swatch is the active palette used for recoloring.
+
+- Click a workspace color to toggle it on or off.
+- Disabled colors stay in the swatch but are ignored by recoloring.
+- Use the swatch menu to change display mode, color label format, or re-sort colors.
+- Use **Clear Unselected** to remove disabled colors from the swatch.
+- Use the trash button in the Workspace Swatch panel to clear all workspace colors.
+
+## Built-in Palettes
+
+The built-in palette explorer lets you search public palette collections and load palettes into the source list.
+
+- Use search to find palettes by name, source, or collection.
+- Sort results by name, palette size, source, or collection.
+- Load a palette from the explorer, then add colors from it into the workspace swatch.
+- In the loaded palette list, hover a row to reveal the add-all button.
+- Use the settings button to select and remove loaded built-in palettes.
+
+## Recoloring Images
+
+The target image preview supports:
+
+- Recolored/original comparison by holding the eye button.
+- Zoom in, zoom out, reset zoom, and actual-size view.
+- Mouse panning when zoomed in.
+- Saving the recolored image.
+- Loading a different target image from the preview toolbar.
+
+Recolor settings let you control how strongly the workspace swatch is applied and how much original lightness is preserved.
+
+## Snapshots
+
+Snapshots save the current workspace in your browser.
+
+Use them when you want to try different palette or recolor settings without losing a previous setup.
+
+Snapshots include:
+
+- Workspace colors and enabled/disabled state.
+- Loaded built-in palettes.
+- Current tool settings.
+- Image references and browser-restorable image data when available.
+
+You can also import and export the workspace state as JSON from the Snapshots panel.
 
 ## Notes
 
-`public/palette-sources/paletteer-palettes.json` contains Paletteer discrete palettes as grouped colors with only `hex` and `rgb` values.
+- This is a local tool. Your files are processed in the browser.
+- Browser storage is used for saved state and snapshots.
+- If you clear browser storage, saved snapshots may be removed.
+- Exported JSON stores image references instead of embedding full image files.
 
-`public/palette-sources/dictionary-of-colour-combinations-palettes.json` contains Sanzo Wada's 348 combinations as grouped palette colors.
+## For Maintainers
 
-Palette extraction and recoloring use `image-q`. Swatch sorting uses `culori` for OKLab, OKLCh, Lab, and HSV color-space conversions, while image-q distance formulas remain available for nearest-neighbor palette ordering.
+Useful commands:
 
-Strength is applied after palette quantization as a linear blend between the original pixel and the recolored pixel:
+```sh
+npm run build
+npm run preview
+npm run extract:palettes
+```
 
-- `0%`: original color
-- `100%`: full recolored palette result
-
-Alpha is preserved from the original image.
+`npm run extract:palettes` regenerates the built-in palette JSON files from the source data used by the project.
