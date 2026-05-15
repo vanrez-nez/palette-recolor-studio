@@ -328,12 +328,13 @@ h1 {
 .tab-switcher {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 4px;
+  gap: 0;
   margin-bottom: 14px;
-  border: 1px solid #2c3747;
-  border-radius: 8px;
-  background: #0d131b;
-  padding: 4px;
+  border: 1px solid #263140;
+  border-radius: 999px;
+  background: #070b11;
+  padding: 0;
+  overflow: hidden;
 }
 
 .source-tabs {
@@ -343,19 +344,34 @@ h1 {
 .tab-option {
   position: relative;
   display: inline-flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
-  gap: 8px;
-  min-height: 38px;
+  min-height: 30px;
   border: 0;
-  border-radius: 6px;
-  background: transparent;
-  color: #9aa8b7;
+  border-radius: 0;
+  background: #0d131b;
+  color: #94a3b8;
   cursor: pointer;
+  font-size: 0.74rem;
   font-weight: 700;
   min-width: 0;
-  padding: 9px 10px 6px;
+  line-height: 1;
+  padding: 7px 12px;
   white-space: nowrap;
+  transition:
+    background 120ms ease,
+    color 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.tab-option:first-child,
+.tab-option:first-child .tab-indicator {
+  border-radius: 999px 0 0 999px;
+}
+
+.tab-option:last-child,
+.tab-option:last-child .tab-indicator {
+  border-radius: 0 999px 999px 0;
 }
 
 .tab-option svg,
@@ -366,8 +382,23 @@ h1 {
   text-overflow: ellipsis;
 }
 
+.tab-option svg {
+  flex: 0 0 auto;
+  transform: translateY(0.5px);
+}
+
 .tab-option[data-state="checked"] {
-  color: #dffdf8;
+  background: linear-gradient(180deg, #1f6f65 0%, #164d47 100%);
+  box-shadow:
+    inset 0 0 0 1px #45c7ba,
+    inset 0 1px 0 rgb(255 255 255 / 0.12),
+    0 4px 14px rgb(0 0 0 / 0.22);
+  color: #e6fffb;
+}
+
+.tab-option:hover:not([data-state="checked"]) {
+  background: #141b24;
+  color: #cbd5e1;
 }
 
 .tab-option:focus-visible {
@@ -376,11 +407,7 @@ h1 {
 }
 
 .tab-indicator {
-  position: absolute;
-  inset: 0;
-  border-radius: 6px;
-  background: #18332f;
-  box-shadow: inset 0 0 0 1px #2e8077;
+  display: none;
 }
 
 .settings-grid {

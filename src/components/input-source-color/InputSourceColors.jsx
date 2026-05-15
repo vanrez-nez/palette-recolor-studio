@@ -1,5 +1,5 @@
 import * as RadioGroup from "@radix-ui/react-radio-group";
-import { FileImage, FileUp, Library, Plus, Settings, Trash2 } from "lucide-react";
+import { FileImage, FileUp, Plus, Settings, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { ColorSwatch } from "../common/ColorSwatch.jsx";
 import { CollapsiblePanel } from "../common/CollapsiblePanel.jsx";
@@ -68,17 +68,14 @@ export function InputSourceColors({
       >
         <RadioGroup.Item className="tab-option" value="built-in">
           <RadioGroup.Indicator className="tab-indicator" />
-          <Library aria-hidden="true" size={17} />
           <span>Built-in Palettes</span>
         </RadioGroup.Item>
         <RadioGroup.Item className="tab-option" value="image">
           <RadioGroup.Indicator className="tab-indicator" />
-          <FileImage aria-hidden="true" size={17} />
           <span>Image</span>
         </RadioGroup.Item>
         <RadioGroup.Item className="tab-option" value="palette">
           <RadioGroup.Indicator className="tab-indicator" />
-          <FileUp aria-hidden="true" size={17} />
           <span>AFPalette</span>
         </RadioGroup.Item>
       </RadioGroup.Root>
