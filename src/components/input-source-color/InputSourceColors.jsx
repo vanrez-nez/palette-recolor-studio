@@ -21,6 +21,7 @@ export function InputSourceColors({
   onExpandedChange,
   onImageFile,
   onPaletteFile,
+  onSortColors,
   onSourceChange,
   onUpdateExtractSetting,
   onUpdateSwatchView,
@@ -148,6 +149,7 @@ export function InputSourceColors({
             view={swatchView}
             onViewChange={onUpdateSwatchView}
             onColorClick={(color) => onAddColor(color, activeImport)}
+            onSortColors={onSortColors}
           />
           <div className="source-result-actions">
             <button className="ghost-action" type="button" onClick={onAddAll}>

@@ -12,6 +12,7 @@ import { extractImagePalette } from "./components/input-source-color/imagePalett
 import { SnapshotLoadDialog, SnapshotsPanel } from "./components/snapshots/SnapshotsPanel.jsx";
 import { WorkspaceSwatch } from "./components/workspace-swatch/WorkspaceSwatch.jsx";
 import { DEFAULT_EXTRACT, DEFAULT_RECOLOR, EXPORT_VERSION, RECOLOR_PREVIEW_DEBOUNCE_MS, SNAPSHOTS_KEY, STORAGE_KEY } from "./utils/constants.js";
+import { sortColors } from "./utils/colorSorting.js";
 import { dataUrlToFile, fileReference, fileToDataUrl, loadDataUrlImage } from "./utils/files.js";
 import { loadSavedState, loadSnapshots, snapshotHash } from "./utils/storage.js";
 
@@ -247,7 +248,7 @@ export default function App() {
         fileName: file.name,
         fileSize: file.size,
         meta: `v${parsed.version}`,
-        colors: parsed.colors,
+        colors: sortColors(parsed.colors),
       });
     } catch (parseError) {
       setPaletteImport(null);
@@ -282,7 +283,7 @@ export default function App() {
         sourceWidth: extracted.sourceWidth,
         sourceHeight: extracted.sourceHeight,
         meta: `${extracted.sourceWidth}x${extracted.sourceHeight}`,
-        colors: extracted.colors,
+        colors: sortColors(extracted.colors),
       });
     } catch (extractError) {
       setImageImport(null);
@@ -358,6 +359,27 @@ export default function App() {
 
   function clearUnselectedWorkspaceColors() {
     setWorkspaceColors((colors) => colors.filter((color) => color.enabled !== false));
+  }
+
+  function sortActiveImportColors(distanceFormula) {
+    if (!activeImport) return;
+    const sortImport = (currentImport) =>
+      currentImport
+        ? {
+            ...currentImport,
+            colors: sortColors(currentImport.colors, distanceFormula),
+          }
+        : null;
+
+    if (activeImport.type === "palette") {
+      setPaletteImport(sortImport);
+    } else if (activeImport.type === "image") {
+      setImageImport(sortImport);
+    }
+  }
+
+  function sortWorkspaceColors(distanceFormula) {
+    setWorkspaceColors((colors) => sortColors(colors, distanceFormula));
   }
 
   function togglePanel(panelId) {
@@ -715,6 +737,7 @@ export default function App() {
                 onExpandedChange={(expanded) => setCollapsedPanels((panels) => ({ ...panels, source: !expanded }))}
                 onImageFile={importImageFile}
                 onPaletteFile={importPaletteFile}
+                onSortColors={sortActiveImportColors}
                 onSourceChange={setActiveSource}
                 onUpdateExtractSetting={updateExtractSetting}
                 onUpdateSwatchView={(nextView) => updateSwatchView(activeImportSwatchId, nextView)}
@@ -731,6 +754,7 @@ export default function App() {
                 onColorRemove={(color) => removeWorkspaceColor(color.id)}
                 onColorToggle={(color) => toggleWorkspaceColor(color.id)}
                 onExpandedChange={(expanded) => setCollapsedPanels((panels) => ({ ...panels, workspace: !expanded }))}
+                onSortColors={sortWorkspaceColors}
                 onUpdateSwatchView={(nextView) => updateSwatchView("workspace", nextView)}
                 swatchView={getSwatchView("workspace")}
               />

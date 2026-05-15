@@ -1,7 +1,23 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { Download, FolderOpen, MoreVertical, Save, Upload } from "lucide-react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { CollapsiblePanel } from "../common/CollapsiblePanel.jsx";
 import { friendlyTime } from "../../utils/storage.js";
+
+const SNAPSHOT_MENU_WIDTH = 156;
+const VIEWPORT_PADDING = 8;
+
+function getMenuPosition(trigger) {
+  const rect = trigger.getBoundingClientRect();
+  const maxLeft = Math.max(VIEWPORT_PADDING, window.innerWidth - SNAPSHOT_MENU_WIDTH - VIEWPORT_PADDING);
+  const left = Math.min(Math.max(VIEWPORT_PADDING, rect.right - SNAPSHOT_MENU_WIDTH), maxLeft);
+
+  return {
+    left,
+    top: rect.bottom + 6,
+  };
+}
 
 export function SnapshotsPanel({
   importInputRef,
@@ -16,6 +32,38 @@ export function SnapshotsPanel({
   onSave,
   snapshots,
 }) {
+  const menuButtonRef = useRef(null);
+  const popoverRef = useRef(null);
+  const [menuPosition, setMenuPosition] = useState(null);
+
+  useEffect(() => {
+    if (!isMenuOpen) return undefined;
+
+    function updatePosition() {
+      if (menuButtonRef.current) {
+        setMenuPosition(getMenuPosition(menuButtonRef.current));
+      }
+    }
+
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition, true);
+    return () => {
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition, true);
+    };
+  }, [isMenuOpen]);
+
+  useLayoutEffect(() => {
+    if (!isMenuOpen || !popoverRef.current) return;
+    const rect = popoverRef.current.getBoundingClientRect();
+    const maxTop = Math.max(VIEWPORT_PADDING, window.innerHeight - rect.height - VIEWPORT_PADDING);
+    const nextTop = Math.min(Math.max(VIEWPORT_PADDING, rect.top), maxTop);
+    if (Math.abs(nextTop - rect.top) > 0.5) {
+      setMenuPosition((position) => (position ? { ...position, top: nextTop } : position));
+    }
+  }, [isMenuOpen, menuPosition]);
+
   return (
     <CollapsiblePanel
       title="Snapshots"
@@ -25,17 +73,34 @@ export function SnapshotsPanel({
       actions={
         <div className="snapshot-menu" ref={menuRef}>
           <button
+            ref={menuButtonRef}
             className="icon-button snapshot-menu-button"
             type="button"
             title="Snapshot actions"
             aria-label="Snapshot actions"
             aria-expanded={isMenuOpen}
-            onClick={onMenuToggle}
+            onClick={(event) => {
+              if (!isMenuOpen) {
+                setMenuPosition(getMenuPosition(event.currentTarget));
+              }
+              onMenuToggle();
+            }}
           >
             <MoreVertical aria-hidden="true" size={16} />
           </button>
-          {isMenuOpen && (
-            <div className="snapshot-menu-popover" role="menu">
+          {isMenuOpen &&
+            menuPosition &&
+            createPortal(
+              <div
+                ref={popoverRef}
+                className="snapshot-menu-popover"
+                role="menu"
+                style={{
+                  left: `${menuPosition.left}px`,
+                  top: `${menuPosition.top}px`,
+                }}
+                onPointerDown={(event) => event.stopPropagation()}
+              >
               <button type="button" role="menuitem" onClick={() => importInputRef.current?.click()}>
                 <Upload aria-hidden="true" size={14} />
                 Import
@@ -48,8 +113,9 @@ export function SnapshotsPanel({
                 <Save aria-hidden="true" size={14} />
                 Save
               </button>
-            </div>
-          )}
+              </div>,
+              document.body,
+            )}
           <input
             ref={importInputRef}
             className="hidden-file-input"

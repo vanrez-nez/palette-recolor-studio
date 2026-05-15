@@ -10,6 +10,7 @@ export function WorkspaceSwatch({
   onColorRemove,
   onColorToggle,
   onExpandedChange,
+  onSortColors,
   onUpdateSwatchView,
   swatchView,
 }) {
@@ -42,6 +43,7 @@ export function WorkspaceSwatch({
           onClearUnselected={onClearUnselected}
           onColorToggle={onColorToggle}
           onColorRemove={onColorRemove}
+          onSortColors={onSortColors}
         />
       ) : (
         <div className="empty-panel">No workspace colors selected.</div>

@@ -647,11 +647,10 @@ select {
 }
 
 .snapshot-menu-popover {
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
-  z-index: 10;
-  min-width: 116px;
+  position: fixed;
+  z-index: 80;
+  width: 156px;
+  min-width: 156px;
   border: 1px solid #344052;
   border-radius: 8px;
   background: #0d131b;
@@ -792,12 +791,7 @@ select {
   color: #e2e8f0;
 }
 
-.color-swatch-menu-popover {
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
-  z-index: 10;
-  min-width: 108px;
+.color-swatch-menu-surface {
   border: 1px solid #344052;
   border-radius: 8px;
   background: #0d131b;
@@ -805,7 +799,14 @@ select {
   padding: 6px;
 }
 
-.color-swatch-menu-popover button {
+.color-swatch-menu-popover {
+  position: fixed;
+  z-index: 80;
+  width: 224px;
+  min-width: 224px;
+}
+
+.color-swatch-menu-surface button {
   display: grid;
   grid-template-columns: 14px minmax(0, 1fr);
   align-items: center;
@@ -820,22 +821,22 @@ select {
   text-align: left;
 }
 
-.color-swatch-menu-popover button.selected {
+.color-swatch-menu-surface button.selected {
   color: #dffdf8;
 }
 
-.color-swatch-menu-popover button:hover:not(:disabled),
-.color-swatch-menu-popover button:focus-visible {
+.color-swatch-menu-surface button:hover:not(:disabled),
+.color-swatch-menu-surface button:focus-visible {
   background: rgb(148 163 184 / 0.14);
   color: #ffffff;
 }
 
-.color-swatch-menu-popover button:focus-visible {
+.color-swatch-menu-surface button:focus-visible {
   outline: 1px solid rgb(94 234 212 / 0.55);
   outline-offset: -1px;
 }
 
-.color-swatch-menu-popover button:disabled {
+.color-swatch-menu-surface button:disabled {
   opacity: 0.42;
 }
 
@@ -849,6 +850,74 @@ select {
 
 .color-swatch-menu-check svg {
   display: block;
+}
+
+.color-swatch-submenu {
+  position: relative;
+}
+
+.color-swatch-submenu::after {
+  position: absolute;
+  top: -6px;
+  bottom: -6px;
+  left: 100%;
+  width: 10px;
+  content: "";
+}
+
+.color-swatch-menu-popover .color-swatch-submenu-trigger {
+  grid-template-columns: 14px minmax(0, 1fr) 13px;
+  white-space: nowrap;
+}
+
+.color-swatch-submenu-label {
+  overflow: hidden;
+  min-width: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.color-swatch-submenu-icon {
+  justify-self: end;
+  width: 13px;
+  height: 13px;
+  color: #94a3b8;
+}
+
+.color-swatch-submenu-popover {
+  position: fixed;
+  z-index: 81;
+  display: grid;
+  width: 264px;
+  max-height: calc(100vh - 16px);
+  overflow: auto;
+  scrollbar-color: #344052 transparent;
+  scrollbar-width: thin;
+}
+
+.color-swatch-submenu-popover button {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.color-swatch-sort-group {
+  display: grid;
+  gap: 1px;
+}
+
+.color-swatch-sort-group + .color-swatch-sort-group {
+  margin-top: 5px;
+  padding-top: 5px;
+  border-top: 1px solid #263241;
+}
+
+.color-swatch-sort-group-title {
+  padding: 3px 8px 2px;
+  color: #6f7d8e;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0;
 }
 
 .menu-separator {
