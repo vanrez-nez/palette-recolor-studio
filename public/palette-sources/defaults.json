@@ -1,0 +1,10 @@
+{
+  "activeSource": "image",
+  "sourceImagePath": "palette-sources/sample_color.png",
+  "targetImagePath": "palette-sources/sample_target.png",
+  "builtInPaletteIds": [
+    "paletteer:awtools:bpalette",
+    "paletteer:awtools:a-palette",
+    "dictionary-of-colour-combinations:combination-1"
+  ]
+}

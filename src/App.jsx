@@ -8,6 +8,7 @@ import { ImageRecolor } from "./components/image-recolor/ImageRecolor.jsx";
 import { drawSourceImageToCanvas, loadImageFile } from "./components/image-recolor/recolorImage.js";
 import { InputSourceColors } from "./components/input-source-color/InputSourceColors.jsx";
 import { parseAFPalette } from "./components/input-source-color/afpalette.js";
+import { loadBuiltInCatalog } from "./components/input-source-color/builtInPalettes.js";
 import { extractImagePalette } from "./components/input-source-color/imagePalette.js";
 import { SnapshotLoadDialog, SnapshotsPanel } from "./components/snapshots/SnapshotsPanel.jsx";
 import { WorkspaceSwatch } from "./components/workspace-swatch/WorkspaceSwatch.jsx";
@@ -16,10 +17,12 @@ import { sortColors } from "./utils/colorSorting.js";
 import { dataUrlToFile, fileReference, fileToDataUrl, loadDataUrlImage } from "./utils/files.js";
 import { loadSavedState, loadSnapshots, snapshotHash } from "./utils/storage.js";
 
+const DEFAULTS_PATH = "palette-sources/defaults.json";
+
 export default function App() {
   const savedState = useMemo(loadSavedState, []);
   const savedSnapshots = useMemo(loadSnapshots, []);
-  const [activeSource, setActiveSource] = useState(savedState?.activeSource ?? "palette");
+  const [activeSource, setActiveSource] = useState(savedState?.activeSource ?? "image");
   const [paletteImport, setPaletteImport] = useState(savedState?.paletteImport ?? null);
   const [imageImport, setImageImport] = useState(savedState?.imageImport ?? null);
   const [builtInPalettes, setBuiltInPalettes] = useState(savedState?.builtInPalettes ?? []);
@@ -55,6 +58,7 @@ export default function App() {
   const [isPreviewPanning, setIsPreviewPanning] = useState(false);
   const canvasRef = useRef(null);
   const workerRef = useRef(null);
+  const defaultsLoadedRef = useRef(false);
   const recolorJobIdRef = useRef(0);
   const previewPanRef = useRef(null);
   const previewStackRef = useRef(null);
@@ -163,6 +167,52 @@ export default function App() {
   }, [extractSettings, sourceImageFile, sourceImagePreview]);
 
   useEffect(() => {
+    if (savedState || defaultsLoadedRef.current) return;
+    defaultsLoadedRef.current = true;
+    let cancelled = false;
+
+    loadAppDefaults()
+      .then(async (defaults) => {
+        if (cancelled) return;
+
+        if (defaults.activeSource) {
+          setActiveSource(defaults.activeSource);
+        }
+
+        if (defaults.sourceImagePath && !sourceImagePreview && !sourceImageFile) {
+          loadPublicImageFile(defaults.sourceImagePath)
+            .then((file) => {
+              if (!cancelled) importImageFile(file, defaults.sourceImagePath);
+            })
+            .catch(() => setImageError("Could not load the default source image."));
+        }
+
+        if (defaults.targetImagePath && !targetImageSnapshot && !targetImage) {
+          loadPublicImageFile(defaults.targetImagePath)
+            .then((file) => {
+              if (!cancelled) importTargetFile(file, defaults.targetImagePath);
+            })
+            .catch(() => setTargetError("Could not load the default target image."));
+        }
+
+        if (Array.isArray(defaults.builtInPaletteIds) && defaults.builtInPaletteIds.length && !builtInPalettes.length) {
+          const catalog = await loadBuiltInCatalog();
+          const catalogById = new Map(catalog.map((palette) => [palette.id, palette]));
+          if (!cancelled) {
+            setBuiltInPalettes(defaults.builtInPaletteIds.map((id) => catalogById.get(id)).filter(Boolean));
+          }
+        }
+      })
+      .catch(() => {
+        setImageError("Could not load the default workspace.");
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [savedState]);
+
+  useEffect(() => {
     if (!targetImageSnapshot || targetImage) return;
     loadDataUrlImage(targetImageSnapshot.url, targetImageSnapshot.fileName, targetImageSnapshot.fileSize)
       .then(setTargetImage)
@@ -259,7 +309,28 @@ export default function App() {
     }
   }
 
-  async function importImageFile(file) {
+  async function loadAppDefaults() {
+    const response = await fetch(`${import.meta.env.BASE_URL}${DEFAULTS_PATH}`);
+    if (!response.ok) throw new Error("Could not load defaults.");
+    return response.json();
+  }
+
+  async function loadPublicImageFile(path) {
+    const response = await fetch(`${import.meta.env.BASE_URL}${path}`);
+    if (!response.ok) throw new Error(`Could not load ${path}.`);
+    const blob = await response.blob();
+    const fileName = path.split("/").pop() || "sample.png";
+    return new File([blob], fileName, { type: blob.type || "image/png" });
+  }
+
+  function imageReferenceFromFile(file, path) {
+    return {
+      ...fileReference(file),
+      path,
+    };
+  }
+
+  async function importImageFile(file, referencePath = file?.path || file?.webkitRelativePath || file?.name) {
     setImageError("");
     if (!file) return;
     if (sourceImagePreview?.url) URL.revokeObjectURL(sourceImagePreview.url);
@@ -268,10 +339,10 @@ export default function App() {
       fileName: file.name,
       fileSize: file.size,
       fileType: file.type,
-      path: file.path || file.webkitRelativePath || file.name,
+      path: referencePath,
       url: dataUrl,
     });
-    setSourceImageReference(fileReference(file));
+    setSourceImageReference(imageReferenceFromFile(file, referencePath));
     setSourceImageFile(file);
   }
 
@@ -294,7 +365,7 @@ export default function App() {
     }
   }
 
-  async function importTargetFile(file) {
+  async function importTargetFile(file, referencePath = file?.path || file?.webkitRelativePath || file?.name) {
     setTargetError("");
     if (!file) return;
     if (targetImage?.url && !targetImage.persisted) URL.revokeObjectURL(targetImage.url);
@@ -306,10 +377,10 @@ export default function App() {
         fileName: file.name,
         fileSize: file.size,
         fileType: file.type,
-        path: file.path || file.webkitRelativePath || file.name,
+        path: referencePath,
         url: dataUrl,
       });
-      setTargetImageReference(fileReference(file));
+      setTargetImageReference(imageReferenceFromFile(file, referencePath));
       resetPreviewZoom();
     } catch (loadError) {
       setTargetImage(null);
