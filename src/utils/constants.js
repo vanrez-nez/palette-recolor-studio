@@ -7,7 +7,7 @@ export const DEFAULT_EXTRACT = {
 export const DEFAULT_RECOLOR = {
   imageQuantization: "nearest",
   colorDistanceFormula: "euclidean-bt709-noalpha",
-  strength: 100,
+  strength: 50,
   previewSize: 900,
 };
 

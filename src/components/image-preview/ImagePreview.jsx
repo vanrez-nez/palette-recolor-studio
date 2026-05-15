@@ -98,7 +98,11 @@ export function ImagePreview({
           >
             <div
               className="preview-viewport-content"
-              style={{ transform: `translate(${previewPan.x}px, ${previewPan.y}px) scale(${previewZoom})` }}
+              style={{
+                "--preview-image-aspect": `${targetImage.width} / ${targetImage.height}`,
+                "--preview-fit-width": `${68 * (targetImage.width / targetImage.height)}vh`,
+                transform: `translate(${previewPan.x}px, ${previewPan.y}px) scale(${previewZoom})`,
+              }}
             >
               <canvas ref={canvasRef} className={`preview-canvas ${activeWorkspaceColors.length ? "" : "hidden-canvas"}`} />
               <img

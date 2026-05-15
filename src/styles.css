@@ -17,6 +17,10 @@ body {
   min-height: 100vh;
 }
 
+#root {
+  min-height: 100vh;
+}
+
 button,
 input,
 select {
@@ -56,13 +60,67 @@ button:disabled {
 }
 
 main {
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
-  padding: 28px;
+  padding: 28px 28px 0;
 }
 
 .workspace {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   width: min(1920px, 100%);
   margin: 0 auto;
+}
+
+.app-footer {
+  width: 100vw;
+  margin: auto calc(50% - 50vw) 0;
+  border-top: 1px solid #1f2937;
+  background: #070b11;
+  color: #64748b;
+  font-size: 0.76rem;
+  padding: 10px 28px;
+}
+
+.app-footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: min(1920px, 100%);
+  margin: 0 auto;
+}
+
+.app-footer-brand {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.app-footer-version {
+  color: #475569;
+  font-size: 0.7rem;
+}
+
+.tool-grid + .app-footer {
+  margin-top: 20px;
+}
+
+.app-footer-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  color: #94a3b8;
+  text-decoration: none;
+}
+
+.app-footer-link:hover {
+  background: rgb(148 163 184 / 0.12);
+  color: #e2e8f0;
 }
 
 .topbar {
@@ -117,11 +175,14 @@ h1 {
 
 .tool-grid {
   display: flex;
+  flex: 1;
   min-height: 0;
 }
 
 .tool-grid-pane {
+  display: flex;
   min-width: 0;
+  min-height: 0;
 }
 
 .tool-grid-splitter {
@@ -175,15 +236,24 @@ h1 {
   display: grid;
   align-content: start;
   gap: 18px;
+  width: 100%;
   min-width: 0;
+  min-height: 0;
+}
+
+.main-stage {
+  align-content: stretch;
 }
 
 .panel {
+  display: flex;
+  flex-direction: column;
   border: 1px solid #263140;
   border-radius: 8px;
   background: #111821;
   padding: 16px;
   min-width: 0;
+  min-height: 0;
 }
 
 .panel-title {
@@ -273,7 +343,7 @@ h1 {
 .tab-option {
   position: relative;
   display: inline-flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
   gap: 8px;
   min-height: 38px;
@@ -284,7 +354,7 @@ h1 {
   cursor: pointer;
   font-weight: 700;
   min-width: 0;
-  padding: 8px 10px;
+  padding: 9px 10px 6px;
   white-space: nowrap;
 }
 
@@ -1454,7 +1524,9 @@ select {
   display: grid;
   grid-template-columns: 260px minmax(0, 1fr);
   gap: 16px;
+  flex: 1;
   margin-top: 16px;
+  min-height: 0;
 }
 
 .settings-panel {
@@ -1483,20 +1555,26 @@ output {
 }
 
 .preview-panel {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
+  min-height: 0;
 }
 
 .preview-dropzone {
   position: relative;
+  display: grid;
   align-content: center;
   justify-items: center;
+  flex: 1;
+  height: 100%;
   min-height: 380px;
   padding: 0;
   overflow: hidden;
 }
 
 .preview-dropzone.has-image {
-  display: block;
+  grid-template-rows: auto minmax(0, 1fr);
   border-style: solid;
   background: #05070a;
 }
@@ -1520,10 +1598,8 @@ output {
 .preview-canvas {
   display: block;
   width: 100%;
-  height: auto;
-  max-height: 68vh;
+  height: 100%;
   object-fit: contain;
-  border: 1px solid #263140;
   background: #05070a;
 }
 
@@ -1531,6 +1607,8 @@ output {
   position: relative;
   display: grid;
   place-items: center;
+  width: 100%;
+  height: 100%;
   min-height: 380px;
   overflow: hidden;
   touch-action: none;
@@ -1546,15 +1624,19 @@ output {
 
 .preview-viewport-content {
   position: relative;
-  display: grid;
   grid-area: 1 / 1;
-  place-items: center;
-  width: 100%;
+  align-self: center;
+  justify-self: center;
+  width: min(100%, var(--preview-fit-width, 100%));
+  aspect-ratio: var(--preview-image-aspect, 1);
+  border: 1px solid #263140;
+  max-width: 100%;
   transform-origin: center center;
 }
 
 .preview-viewport-content .preview-canvas {
-  grid-area: 1 / 1;
+  position: absolute;
+  inset: 0;
   pointer-events: none;
 }
 

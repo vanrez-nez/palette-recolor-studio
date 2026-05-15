@@ -66,20 +66,20 @@ export function InputSourceColors({
         orientation="horizontal"
         aria-label="Source type"
       >
-        <RadioGroup.Item className="tab-option" value="palette">
+        <RadioGroup.Item className="tab-option" value="built-in">
           <RadioGroup.Indicator className="tab-indicator" />
-          <FileUp aria-hidden="true" size={17} />
-          <span>AFPalette</span>
+          <Library aria-hidden="true" size={17} />
+          <span>Built-in Palettes</span>
         </RadioGroup.Item>
         <RadioGroup.Item className="tab-option" value="image">
           <RadioGroup.Indicator className="tab-indicator" />
           <FileImage aria-hidden="true" size={17} />
           <span>Image</span>
         </RadioGroup.Item>
-        <RadioGroup.Item className="tab-option" value="built-in">
+        <RadioGroup.Item className="tab-option" value="palette">
           <RadioGroup.Indicator className="tab-indicator" />
-          <Library aria-hidden="true" size={17} />
-          <span>Built-in Palettes</span>
+          <FileUp aria-hidden="true" size={17} />
+          <span>AFPalette</span>
         </RadioGroup.Item>
       </RadioGroup.Root>
 
