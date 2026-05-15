@@ -26,6 +26,14 @@ function colorCountLabel(count) {
   return `${count} ${count === 1 ? "Color" : "Colors"}`;
 }
 
+function colorHint(color) {
+  if (!color.name || color.name.toLowerCase() === color.hex.toLowerCase()) {
+    return color.hex;
+  }
+
+  return `${color.name} ${color.hex}`;
+}
+
 function MenuCheck({ checked }) {
   return (
     <span className="color-swatch-menu-check" aria-hidden="true">
@@ -70,6 +78,7 @@ export function ColorSwatch({
   removable = false,
   selectable = false,
   selectedColorKeys,
+  showToolbar = true,
   view = DEFAULT_SWATCH_VIEW,
 }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -198,10 +207,11 @@ export function ColorSwatch({
   }, [isSortMenuOpen]);
 
   return (
-    <div className="color-swatch">
-      <div className="color-swatch-toolbar">
-        <strong className="color-swatch-title">{title}</strong>
-        <div className="color-swatch-menu" ref={menuRef}>
+    <div className={`color-swatch ${showToolbar ? "" : "compact"}`}>
+      {showToolbar && (
+        <div className="color-swatch-toolbar">
+          <strong className="color-swatch-title">{title}</strong>
+          <div className="color-swatch-menu" ref={menuRef}>
           <button
             ref={menuButtonRef}
             className="icon-button color-swatch-menu-button"
@@ -355,8 +365,9 @@ export function ColorSwatch({
               </div>,
               document.body,
             )}
+          </div>
         </div>
-      </div>
+      )}
 
       <div className={`color-swatch-content ${isList ? "list" : "grid"} ${size}`}>
         {colors.map((color) => {
@@ -369,7 +380,7 @@ export function ColorSwatch({
               type="button"
               onClick={() => activateColor(color)}
               onKeyDown={(event) => handleColorKeyDown(event, color)}
-              title={`${color.name} ${color.hex}`}
+              title={colorHint(color)}
             >
               <span className="color-swatch-chip" style={{ backgroundColor: color.hex }} />
               {isList && (

@@ -22,6 +22,7 @@ export default function App() {
   const [activeSource, setActiveSource] = useState(savedState?.activeSource ?? "palette");
   const [paletteImport, setPaletteImport] = useState(savedState?.paletteImport ?? null);
   const [imageImport, setImageImport] = useState(savedState?.imageImport ?? null);
+  const [builtInPalettes, setBuiltInPalettes] = useState(savedState?.builtInPalettes ?? []);
   const [sourceImageFile, setSourceImageFile] = useState(null);
   const [sourceImagePreview, setSourceImagePreview] = useState(savedState?.sourceImagePreview ?? null);
   const [sourceImageReference, setSourceImageReference] = useState(savedState?.sourceImageReference ?? null);
@@ -61,7 +62,7 @@ export default function App() {
   const targetImageInputRef = useRef(null);
   const snapshotMenuRef = useRef(null);
 
-  const activeImport = activeSource === "palette" ? paletteImport : imageImport;
+  const activeImport = activeSource === "palette" ? paletteImport : activeSource === "image" ? imageImport : null;
   const activeWorkspaceColors = useMemo(
     () => workspaceColors.filter((color) => color.enabled !== false),
     [workspaceColors],
@@ -202,6 +203,7 @@ export default function App() {
       activeSource,
       paletteImport,
       imageImport,
+      builtInPalettes,
       sourceImageReference,
       sourceImagePreview,
       workspaceColors,
@@ -221,6 +223,7 @@ export default function App() {
     activeSource,
     paletteImport,
     imageImport,
+    builtInPalettes,
     sourceImageReference,
     sourceImagePreview,
     workspaceColors,
@@ -324,11 +327,24 @@ export default function App() {
           ...color,
           id: `${color.hex}-${source.type}-${colors.length}`,
           sourceType: source.type,
-          sourceName: source.fileName,
+          sourceName: source.fileName ?? source.name,
           enabled: true,
         },
       ];
     });
+  }
+
+  function addLoadedBuiltInPalette(palette) {
+    setBuiltInPalettes((palettes) => {
+      if (palettes.some((item) => item.id === palette.id)) return palettes;
+      return [...palettes, palette];
+    });
+    setActiveSource("built-in");
+  }
+
+  function removeLoadedBuiltInPalettes(paletteIds) {
+    const paletteIdSet = new Set(paletteIds);
+    setBuiltInPalettes((palettes) => palettes.filter((palette) => !paletteIdSet.has(palette.id)));
   }
 
   function addAllFromActiveImport() {
@@ -394,6 +410,7 @@ export default function App() {
       activeSource,
       paletteImport,
       imageImport,
+      builtInPalettes,
       sourceImageReference:
         sourceImageReference ??
         (sourceImagePreview
@@ -467,6 +484,7 @@ export default function App() {
     setActiveSource(importedState.activeSource ?? "palette");
     setPaletteImport(importedState.paletteImport ?? null);
     setImageImport(importedState.imageImport ?? null);
+    setBuiltInPalettes(importedState.builtInPalettes ?? []);
     setSourceImageFile(null);
     setSourceImagePreview(importedState.sourceImagePreview ?? null);
     setSourceImageReference(importedState.sourceImageReference ?? null);
@@ -697,6 +715,7 @@ export default function App() {
     if (targetImage?.url && !targetImage.persisted) URL.revokeObjectURL(targetImage.url);
     setPaletteImport(null);
     setImageImport(null);
+    setBuiltInPalettes([]);
     setSourceImageFile(null);
     setSourceImagePreview(null);
     setSourceImageReference(null);
@@ -726,21 +745,31 @@ export default function App() {
                 activeImport={activeImport}
                 activeImportSwatchId={activeImportSwatchId}
                 activeSource={activeSource}
+                builtInPalettes={builtInPalettes}
                 dragging={dragging}
                 error={error}
                 extractSettings={extractSettings}
+                getSwatchView={getSwatchView}
                 imageError={imageError}
                 isExpanded={!collapsedPanels.source}
                 onAddAll={addAllFromActiveImport}
                 onAddColor={addColor}
+                onAddLoadedPalette={addLoadedBuiltInPalette}
                 onDrop={{ handle: handleDrop, setDragging }}
                 onExpandedChange={(expanded) => setCollapsedPanels((panels) => ({ ...panels, source: !expanded }))}
                 onImageFile={importImageFile}
                 onPaletteFile={importPaletteFile}
+                onRemoveLoadedPalettes={removeLoadedBuiltInPalettes}
                 onSortColors={sortActiveImportColors}
                 onSourceChange={setActiveSource}
                 onUpdateExtractSetting={updateExtractSetting}
-                onUpdateSwatchView={(nextView) => updateSwatchView(activeImportSwatchId, nextView)}
+                onUpdateSwatchView={(idOrView, nextView) => {
+                  if (typeof idOrView === "string") {
+                    updateSwatchView(idOrView, nextView);
+                  } else {
+                    updateSwatchView(activeImportSwatchId, idOrView);
+                  }
+                }}
                 sourceImagePreview={sourceImagePreview}
                 sourceImageReference={sourceImageReference}
                 swatchView={getSwatchView(activeImportSwatchId)}

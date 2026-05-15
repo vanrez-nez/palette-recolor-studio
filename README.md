@@ -29,6 +29,12 @@ Build for production:
 npm run build
 ```
 
+Regenerate the public palette-source JSON files:
+
+```sh
+npm run extract:palettes
+```
+
 Preview the production build:
 
 ```sh
@@ -61,8 +67,14 @@ src/
 - `src/components/image-recolor`: recolor settings UI and recolor worker/utilities.
 - `src/components/image-preview`: image preview, toolbar, zoom, pan, and original/recolored toggle UI.
 - `src/utils`: storage, constants, and file/data URL helpers.
+- `public/palette-sources`: normalized palette JSON extracted from public palette collections.
+- `scripts/extractPaletteSources.mjs`: source-data extractor for the public palette JSON files.
 
 ## Notes
+
+`public/palette-sources/paletteer-palettes.json` contains Paletteer discrete palettes as grouped colors with only `hex` and `rgb` values.
+
+`public/palette-sources/dictionary-of-colour-combinations-palettes.json` contains Sanzo Wada's 348 combinations as grouped palette colors.
 
 Palette extraction and recoloring use `image-q`. Swatch sorting uses `culori` for OKLab, OKLCh, Lab, and HSV color-space conversions, while image-q distance formulas remain available for nearest-neighbor palette ordering.
 
