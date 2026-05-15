@@ -16,8 +16,8 @@ const SORT_DIRECTION_OPTIONS = [
   { value: "desc", label: "Descending" },
 ];
 const PALETTE_SOURCE_FILES = [
-  "/palette-sources/paletteer-palettes.json",
-  "/palette-sources/dictionary-of-colour-combinations-palettes.json",
+  "palette-sources/paletteer-palettes.json",
+  "palette-sources/dictionary-of-colour-combinations-palettes.json",
 ];
 
 function normalizePalette(palette) {
@@ -55,7 +55,7 @@ function normalizePalette(palette) {
 async function loadBuiltInCatalog() {
   const payloads = await Promise.all(
     PALETTE_SOURCE_FILES.map(async (file) => {
-      const response = await fetch(file);
+      const response = await fetch(`${import.meta.env.BASE_URL}${file}`);
       if (!response.ok) throw new Error(`Could not load ${file}`);
       return response.json();
     }),
